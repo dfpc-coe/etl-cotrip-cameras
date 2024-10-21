@@ -131,6 +131,7 @@ export default class Task extends ETL {
                 id: feat.id.replace('camera/', ''),
                 type: 'Feature',
                 properties: {
+                    type: 'b-m-p-s-p-loc',
                     callsign: camera.tooltip,
                     video: {
                         sensor: camera.tooltip,

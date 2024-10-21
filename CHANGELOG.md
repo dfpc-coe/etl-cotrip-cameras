@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.1.0
+
+- :rocket: Add `type: b-m-p-s-p-loc`
+
 ### v1.0.1
 
 - :rocket: Push to Video features
