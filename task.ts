@@ -134,8 +134,22 @@ export default class Task extends ETL {
                     type: 'b-m-p-s-p-loc',
                     callsign: camera.tooltip,
                     video: {
+                        uid: feat.id.replace('camera/', '') + '-video',
                         sensor: camera.tooltip,
-                        url: source.src
+                        url: source.src,
+                        connection: {
+                            networkTimeout: 12000,
+                            uid: feat.id.replace('camera/', '') + '-video',
+                            path: "",
+                            protocol: "raw",
+                            bufferTime: -1,
+                            address: source.src,
+                            port: -1,
+                            roverPort: -1,
+                            rtspReliable: 0,
+                            ignoreEmbeddedKLV: false,
+                            alias: camera.tooltip
+                        }
                     }
                 },
                 geometry: feat.geometry

@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.2.0
+
+- :rocket: Add Video Config entry
+
 ### v1.1.0
 
 - :rocket: Add `type: b-m-p-s-p-loc`
