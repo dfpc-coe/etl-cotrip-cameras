@@ -127,6 +127,11 @@ export default class Task extends ETL {
 
             const source = view.sources[0];
 
+            if (feat.geometry.coordinates[0] === 0 && feat.geometry.coordinates[1] === 0) {
+                console.warn(`ok - skipping ${camera.tooltip} - Null Island Coordinates`)
+                continue;
+            }
+
             features.push({
                 id: feat.id.replace('camera/', ''),
                 type: 'Feature',
