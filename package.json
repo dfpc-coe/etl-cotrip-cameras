@@ -19,7 +19,6 @@
     },
     "dependencies": {
         "@sinclair/typebox": "^0.34.0",
-        "@tak-ps/etl": "^6.4.0",
-        "@types/geojson": "^7946.0.10"
+        "@tak-ps/etl": "^6.4.0"
     }
 }

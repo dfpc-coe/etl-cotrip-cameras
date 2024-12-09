@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.4.1
+
+- :rocket: Remove GeoJSON in favour of `InputFeature` type
+
 ### v1.4.0
 
 - :rocket: Update to latest ETL

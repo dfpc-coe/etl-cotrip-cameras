@@ -1,7 +1,6 @@
-import { Type, TSchema } from '@sinclair/typebox';
-import { FeatureCollection, Feature } from 'geojson';
+import { Type, TSchema, Static } from '@sinclair/typebox';
 import type { Event } from '@tak-ps/etl';
-import ETL, { SchemaType, handler as internal, local } from '@tak-ps/etl';
+import ETL, { InputFeature, InputFeatureCollection, SchemaType, handler as internal, local } from '@tak-ps/etl';
 import { fetch } from '@tak-ps/etl';
 
 const InputSchema = Type.Object({
@@ -27,7 +26,7 @@ export default class Task extends ETL {
     async control(): Promise<void> {
         await this.env(InputSchema);
 
-        const features: Feature[] = [];
+        const features: Static<typeof InputFeature>[] = [];
 
         const res = await fetch('https://www.cotrip.org/api/graphql', {
             method: 'POST',
@@ -163,7 +162,7 @@ export default class Task extends ETL {
             })
         }
 
-        const fc: FeatureCollection = {
+        const fc: Static<typeof InputFeatureCollection> = {
             type: 'FeatureCollection',
             features: features
         }
