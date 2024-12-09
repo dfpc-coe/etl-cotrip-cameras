@@ -1,7 +1,7 @@
 import { Type, TSchema } from '@sinclair/typebox';
 import { FeatureCollection, Feature } from 'geojson';
 import type { Event } from '@tak-ps/etl';
-import ETL, { SchemaType, handler as internal, local, env } from '@tak-ps/etl';
+import ETL, { SchemaType, handler as internal, local } from '@tak-ps/etl';
 import { fetch } from '@tak-ps/etl';
 
 const InputSchema = Type.Object({
@@ -14,6 +14,8 @@ const InputSchema = Type.Object({
 const OutputSchema = Type.Object({})
 
 export default class Task extends ETL {
+    static name = 'etl-cotrip-cameras';
+
     async schema(type: SchemaType = SchemaType.Input): Promise<TSchema> {
         if (type === SchemaType.Input) {
             return InputSchema;
@@ -170,9 +172,8 @@ export default class Task extends ETL {
     }
 }
 
-env(import.meta.url)
-await local(new Task(), import.meta.url);
+await local(new Task(import.meta.url), import.meta.url);
 export async function handler(event: Event = {}) {
-    return await internal(new Task(), event);
+    return await internal(new Task(import.meta.url), event);
 }
 

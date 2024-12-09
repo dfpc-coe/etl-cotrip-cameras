@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.4.0
+
+- :rocket: Update to latest ETL
+
 ### v1.3.0
 
 - :rocket: Avoid posting Null Island Cameras
