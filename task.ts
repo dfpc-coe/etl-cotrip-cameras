@@ -139,6 +139,9 @@ export default class Task extends ETL {
                 properties: {
                     type: 'b-m-p-s-p-loc',
                     callsign: camera.tooltip,
+                    sensor: {
+                        hideFov: true
+                    },
                     video: {
                         uid: feat.id.replace('camera/', '') + '-video',
                         sensor: camera.tooltip,
