@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.4.2
+
+- :rocket: Add HideFOV
+
 ### v1.4.1
 
 - :rocket: Remove GeoJSON in favour of `InputFeature` type
