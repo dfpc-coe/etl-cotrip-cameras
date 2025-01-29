@@ -1,6 +1,6 @@
 import { Type, TSchema, Static } from '@sinclair/typebox';
 import type { Event } from '@tak-ps/etl';
-import ETL, { InputFeature, InputFeatureCollection, SchemaType, handler as internal, local } from '@tak-ps/etl';
+import ETL, { InputFeature, InputFeatureCollection, SchemaType, handler as internal, local, DataFlowType, InvocationType } from '@tak-ps/etl';
 import { fetch } from '@tak-ps/etl';
 
 const InputSchema = Type.Object({
