@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.5.1
+
+- :bug: Fix build bug
+
 ### v1.5.0
 
 - :rocket: Add Capabilities API
