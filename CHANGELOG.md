@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.5.0
+
+- :rocket: Add Capabilities API
+
 ### v1.4.2
 
 - :rocket: Add HideFOV

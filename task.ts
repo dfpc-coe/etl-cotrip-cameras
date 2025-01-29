@@ -14,12 +14,21 @@ const OutputSchema = Type.Object({})
 
 export default class Task extends ETL {
     static name = 'etl-cotrip-cameras';
+    static flow = [ DataFlowType.Incoming ];
+    static invocation = [ InvocationType.Schedule ];
 
-    async schema(type: SchemaType = SchemaType.Input): Promise<TSchema> {
-        if (type === SchemaType.Input) {
-            return InputSchema;
+    async schema(
+        type: SchemaType = SchemaType.Input,
+        flow: DataFlowType = DataFlowType.Incoming
+    ): Promise<TSchema> {
+        if (flow === DataFlowType.Incoming) {
+            if (type === SchemaType.Input) {
+                return InputSchema;
+            } else {
+                return OutputSchema;
+            }
         } else {
-            return OutputSchema;
+            return Type.Object({});
         }
     }
 
