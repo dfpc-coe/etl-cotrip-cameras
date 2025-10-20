@@ -1,6 +1,7 @@
 import { Type, TSchema, Static } from '@sinclair/typebox';
+import { Feature } from '@tak-ps/node-cot'
 import type { Event } from '@tak-ps/etl';
-import ETL, { InputFeature, InputFeatureCollection, SchemaType, handler as internal, local, DataFlowType, InvocationType } from '@tak-ps/etl';
+import ETL, { SchemaType, handler as internal, local, DataFlowType, InvocationType } from '@tak-ps/etl';
 import { fetch } from '@tak-ps/etl';
 
 const InputSchema = Type.Object({
@@ -35,7 +36,7 @@ export default class Task extends ETL {
     async control(): Promise<void> {
         await this.env(InputSchema);
 
-        const features: Static<typeof InputFeature>[] = [];
+        const features: Static<typeof Feature.InputFeature>[] = [];
 
         const res = await fetch('https://www.cotrip.org/api/graphql', {
             method: 'POST',
@@ -174,7 +175,7 @@ export default class Task extends ETL {
             })
         }
 
-        const fc: Static<typeof InputFeatureCollection> = {
+        const fc: Static<typeof Feature.InputFeatureCollection> = {
             type: 'FeatureCollection',
             features: features
         }
