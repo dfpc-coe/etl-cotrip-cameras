@@ -10,6 +10,13 @@
 
 ## Version History
 
+### Pending Release
+
+### v2.14.0
+
+- :bug: Fetch cameras from the CARS `cameras/map-features` feed after COtrip retired its GraphQL API
+- :tada: Expose `route` and `owner` metadata
+
 ### v2.13.0
 
 - :arrow_up: Update Core Dependencies

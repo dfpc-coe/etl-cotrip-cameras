@@ -11,7 +11,10 @@ const InputSchema = Type.Object({
     })
 });
 
-const OutputSchema = Type.Object({})
+const OutputSchema = Type.Object({
+    route: Type.Optional(Type.String()),
+    owner: Type.Optional(Type.String())
+})
 
 export default class Task extends ETL {
     static name = 'etl-cotrip-cameras';
@@ -38,140 +41,93 @@ export default class Task extends ETL {
 
         const features: Static<typeof Feature.InputFeature>[] = [];
 
-        const res = await fetch('https://www.cotrip.org/api/graphql', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                query: `
-                    query MapFeatures($input: MapFeaturesArgs!) {
-                        mapFeaturesQuery(input: $input) {
-                            mapFeatures {
-                                tooltip
-                                features {
-                                    id
-                                    geometry
-                                    properties
-                                }
-                                ... on Camera {
-                                    views(limit: 5) {
-                                        ... on CameraView {
-                                            sources {
-                                                type
-                                                src
-                                            }
-                                        }
-                                        category
-                                    }
-                                }
-                            }
-                            error {
-                                message
-                                type
-                            }
-                        }
-                    }
-                `,
-                variables: {
-                    input: {
-                        west: -180,
-                        south: -85,
-                        east: 180,
-                        north: 85,
-                        zoom: 11,
-                        nonClusterableUris: ['dashboard'],
-                        layerSlugs: ['normalCameras']
-                    }
-                }
-            })
-        })
+        const res = await fetch('https://api-511x-co.carsprogram.org/cameras/map-features', {
+            method: 'GET'
+        });
+
+        if (!res.ok) throw new Error('Error fetching Cameras');
 
         const body = await res.typed(Type.Object({
-            data: Type.Object({
-                mapFeaturesQuery: Type.Object({
-                    mapFeatures: Type.Array(Type.Object({
-                        tooltip: Type.String(),
-                        features: Type.Array(Type.Object({
-                            id: Type.String(),
-                            properties: Type.Unknown(),
-                            geometry: Type.Object({
-                                type: Type.Literal('Point'),
-                                coordinates: Type.Array(Type.Number())
-                            })
-                        })),
-                        views: Type.Array(Type.Object({
-                            category: Type.String(),
-                            sources: Type.Union([Type.Array(Type.Object({
-                                type: Type.String(),
-                                src: Type.String()
-                            })), Type.Null()])
-                        }))
-                    }))
+            features: Type.Array(Type.Object({
+                type: Type.Literal('Feature'),
+                geometry: Type.Object({
+                    type: Type.Literal('Point'),
+                    coordinates: Type.Array(Type.Number())
+                }),
+                properties: Type.Object({
+                    id: Type.Union([Type.String(), Type.Number()]),
+                    name: Type.String(),
+                    tooltip: Type.Optional(Type.String()),
+                    public: Type.Optional(Type.Boolean()),
+                    route: Type.Optional(Type.String()),
+                    cameraOwner: Type.Optional(Type.String()),
+                    views: Type.Optional(Type.Array(Type.Object({
+                        name: Type.Optional(Type.String()),
+                        type: Type.String(),
+                        url: Type.Optional(Type.String()),
+                        broken: Type.Optional(Type.Boolean())
+                    })))
                 })
-            })
+            }))
         }));
 
-        for (const camera of body.data.mapFeaturesQuery.mapFeatures) {
-            if (!camera.features || !camera.features.length) {
-                console.warn(`ok - skipping ${camera.tooltip} - missing feature`)
+        for (const camera of body.features) {
+            const id = String(camera.properties.id);
+            const callsign = camera.properties.tooltip || camera.properties.name;
+
+            if (camera.properties.public === false) {
+                console.warn(`ok - skipping ${callsign} - not public`)
                 continue;
-            } else if (!camera.views || !camera.views.length) {
-                console.warn(`ok - skipping ${camera.tooltip} - mission sources`)
+            } else if (camera.geometry.coordinates.length < 2) {
+                console.warn(`ok - skipping ${callsign} - invalid coordinates`)
                 continue;
-            }
-
-            const feat = camera.features[0];
-
-            if (feat.geometry.coordinates.length < 2) {
-                console.warn(`ok - skipping ${camera.tooltip} - invalid coordinates`)
-            } else if (feat.geometry.coordinates[0] === 0 && feat.geometry.coordinates[1] === 0) {
-                console.warn(`ok - skipping ${camera.tooltip} - null island coordinates`)
-            }
-
-            const view = camera.views[0];
-
-            if (!view.sources || !view.sources.length || view.category !== "VIDEO") {
-                console.warn(`ok - skipping ${camera.tooltip} - missing streaming video`)
+            } else if (camera.geometry.coordinates[0] === 0 && camera.geometry.coordinates[1] === 0) {
+                console.warn(`ok - skipping ${callsign} - null island coordinates`)
                 continue;
             }
 
-            const source = view.sources[0];
+            const view = (camera.properties.views || []).find((v) => {
+                return v.type === 'WMP' && v.url && !v.broken;
+            });
 
-            if (feat.geometry.coordinates[0] === 0 && feat.geometry.coordinates[1] === 0) {
-                console.warn(`ok - skipping ${camera.tooltip} - Null Island Coordinates`)
+            if (!view || !view.url) {
+                console.warn(`ok - skipping ${callsign} - missing streaming video`)
                 continue;
             }
 
             features.push({
-                id: feat.id.replace('camera/', ''),
+                id,
                 type: 'Feature',
                 properties: {
                     type: 'b-m-p-s-p-loc',
-                    callsign: camera.tooltip,
+                    callsign,
                     sensor: {
                         hideFov: true
                     },
                     video: {
-                        uid: feat.id.replace('camera/', '') + '-video',
-                        sensor: camera.tooltip,
-                        url: source.src,
+                        uid: id + '-video',
+                        sensor: callsign,
+                        url: view.url,
                         connection: {
                             networkTimeout: 12000,
-                            uid: feat.id.replace('camera/', '') + '-video',
+                            uid: id + '-video',
                             path: "",
                             protocol: "raw",
                             bufferTime: -1,
-                            address: source.src,
+                            address: view.url,
                             port: -1,
                             roverPort: -1,
                             rtspReliable: 0,
                             ignoreEmbeddedKLV: false,
-                            alias: camera.tooltip
+                            alias: callsign
                         }
+                    },
+                    metadata: {
+                        route: camera.properties.route,
+                        owner: camera.properties.cameraOwner
                     }
                 },
-                geometry: feat.geometry
+                geometry: camera.geometry
             })
         }
 
