@@ -12,6 +12,10 @@
 
 ### Pending Release
 
+### v2.15.0
+
+- :arrow_up: Update `@tak-ps/etl` to 11.x - Output schemas are published as named schemas, as required by CloudTAK v14
+
 ### v2.14.0
 
 - :bug: Fetch cameras from the CARS `cameras/map-features` feed after COtrip retired its GraphQL API
