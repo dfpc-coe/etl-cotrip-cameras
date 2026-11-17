@@ -25,15 +25,9 @@ export default class Task extends ETL {
         type: SchemaType = SchemaType.Input,
         flow: DataFlowType = DataFlowType.Incoming
     ): Promise<TSchema> {
-        if (flow === DataFlowType.Incoming) {
-            if (type === SchemaType.Input) {
-                return InputSchema;
-            } else {
-                return OutputSchema;
-            }
-        } else {
-            return Type.Object({});
-        }
+        if (flow !== DataFlowType.Incoming) return Type.Object({});
+
+        return type === SchemaType.Input ? InputSchema : OutputSchema;
     }
 
     async control(): Promise<void> {
@@ -86,8 +80,8 @@ export default class Task extends ETL {
                 continue;
             }
 
-            const view = (camera.properties.views || []).find((v) => {
-                return v.type === 'WMP' && v.url && !v.broken;
+            const view = (camera.properties.views ?? []).find((v) => {
+                return v.type === 'WMP' && Boolean(v.url) && !v.broken;
             });
 
             if (!view || !view.url) {
@@ -141,7 +135,7 @@ export default class Task extends ETL {
 }
 
 await local(await Task.init(import.meta.url), import.meta.url);
-export async function handler(event: Event = {}) {
-    return await internal(await Task.init(import.meta.url), event);
+export async function handler(event: Event = {}): ReturnType<typeof internal> {
+    return internal(await Task.init(import.meta.url), event);
 }
 
